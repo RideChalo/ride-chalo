@@ -1,0 +1,39 @@
+RIDE CHALO PWA SETUP
+
+1. Upload these 4 files to the GitHub repository root:
+   - manifest.json
+   - service-worker.js
+   - icon-192.png
+   - icon-512.png
+
+2. Open index.html in GitHub and edit it.
+
+3. Immediately before </head>, add:
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b5cff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ride Chalo">
+
+4. Immediately before </body>, add:
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("Ride Chalo PWA ready"))
+      .catch(err => console.error("PWA registration failed:", err));
+  });
+}
+</script>
+
+5. Commit the changes and wait for GitHub Pages to deploy.
+
+6. Open:
+https://ridechalo.github.io/ride-chalo/
+
+7. In Android Chrome/Brave, use the browser menu and choose
+   "Install app" / "Add to Home screen" when available.
+
+NOTE:
+The included RC icon is temporary. Replace icon-192.png and icon-512.png
+with the final Ride Chalo logo later if desired.
