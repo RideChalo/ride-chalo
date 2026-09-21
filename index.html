@@ -44,16 +44,23 @@
     }
 
     .logo {
-      width: 72px;
-      height: 72px;
+      width: 150px;
+      height: 88px;
       margin: auto;
-      border-radius: 22px;
-      background: white;
+      border-radius: 18px;
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 38px;
+      overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,.15);
+    }
+
+    .logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .brand {
@@ -181,9 +188,10 @@
 
   <div class="app">
 
-<div class="logo">
-    <img src="ride-chalo-logo.png" alt="Ride Chalo">
-</div>
+    <div class="top">
+      <div class="logo">
+        <img src="./ride-chalo-logo.png" alt="Ride Chalo">
+      </div>
 
       <div class="brand">
         Ride <span>Chalo</span>
@@ -265,4 +273,9 @@
         return;
       }
 
-      alert("OTP verification will be connected with Supabase in the next
+      alert("OTP verification will be connected with Supabase in the next step.");
+    }
+  </script>
+
+</body>
+</html>
