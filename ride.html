@@ -1,19 +1,381 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0757A0"><title>Book a Ride - Ride Chalo</title><link rel="stylesheet" href="./styles.css"></head>
-<body><div class="app">
-<header class="header"><div class="header-row"><div><h2>🚕 Book a Ride</h2><small>Choose pickup and destination</small></div><button class="iconbtn" onclick="history.back()">←</button></div></header>
-<main class="main">
-<div class="card">
-<div class="form-row"><label class="label">Pickup Location</label><input class="input" id="pickup" placeholder="Enter pickup location"></div>
-<div class="form-row"><label class="label">Destination</label><input class="input" id="destination" placeholder="Where to?"></div>
-<div class="form-row"><label class="label">Ride Type</label><select class="select" id="type"><option>Bike</option><option>Auto</option><option>Cab</option></select></div>
-<button class="btn" onclick="book()">Find Ride</button><div id="msg" class="notice hidden"></div>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-row">
+      <div>
+        <h2>🚕 Book a Ride</h2>
+        <small>Choose pickup and destination</small>
+      </div>
+      <button class="iconbtn" onclick="history.back()">←</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="card" id="pickupCard">
+      <div class="section-title">Pickup Location</div>
+      <div class="location-status" id="locationStatus">📍 Getting your current location...</div>
+
+      <div id="currentLocationBox" class="current-location hidden">
+        <div><b>Current location</b><div id="currentLocationText">Detecting...</div></div>
+        <button class="small-btn" onclick="useCurrentLocation()">Use</button>
+      </div>
+
+      <div class="form-row">
+        <label class="label">Pickup location</label>
+        <input class="input" id="pickup" placeholder="Search pickup location"
+               autocomplete="off" oninput="searchPlaces('pickup')">
+        <div id="pickupSuggestions" class="suggestions"></div>
+      </div>
+
+      <div id="otherPersonBox" class="other-person hidden">
+        <div class="question">Is this ride for someone else?</div>
+        <div class="choice-row">
+          <button class="choice-btn" onclick="setForSomeone(false,this)">No, for me</button>
+          <button class="choice-btn" onclick="setForSomeone(true,this)">Yes, someone else</button>
+        </div>
+        <div id="someonePhoneBox" class="hidden">
+          <label class="label">Passenger mobile number</label>
+          <input class="input" id="passengerPhone" type="tel" inputmode="numeric"
+                 maxlength="10" placeholder="Enter 10-digit mobile number">
+        </div>
+      </div>
+      <button class="btn" onclick="confirmPickup()">Continue</button>
+    </div>
+
+    <div class="card hidden" id="destinationCard">
+      <div class="section-title">Destination</div>
+      <div class="form-row">
+        <label class="label">Where to?</label>
+        <input class="input" id="destination" placeholder="Type at least 3 letters"
+               autocomplete="off" oninput="searchPlaces('destination')">
+        <div id="destinationSuggestions" class="suggestions"></div>
+      </div>
+      <button class="btn" onclick="confirmDestination()">Find Vehicles</button>
+    </div>
+
+    <div class="card hidden" id="vehiclesCard">
+      <div class="section-title">Available Vehicles</div>
+      <div class="route-summary">
+        <div><b>Pickup</b><span id="pickupSummary"></span></div>
+        <div><b>Drop</b><span id="destinationSummary"></span></div>
+      </div>
+      <div id="vehicleList" class="vehicle-list"></div>
+      <div class="login-note">Prices shown here are the prices configured by Ride Chalo.</div>
+      <button class="btn" onclick="confirmVehicle()">Continue with Selected Vehicle</button>
+    </div>
+
+    <div id="msg" class="notice hidden"></div>
+
+    <div class="section">
+      <div class="section-title">Safety</div>
+      <div class="card">🛡️ Share your ride details with a trusted contact after booking.</div>
+    </div>
+  </main>
 </div>
-<div class="section"><div class="section-title">Safety</div><div class="card">🛡️ Share your ride details with a trusted contact after booking.</div></div>
-</main>
-</div>
+
 <script>
-function book(){let p=pickup.value.trim(),d=destination.value.trim();if(!p||!d){msg('Please enter pickup and destination.');return}localStorage.setItem('rc_last_ride',JSON.stringify({pickup:p,destination:d,type:type.value,status:'Searching'}));msg('Ride request created. Driver matching will be connected in the next backend step.',true)}
-function msg(t,ok=false){const e=document.getElementById('msg');e.textContent=t;e.className='notice '+(ok?'success':'error')}
-</script></body></html>
+let currentCoords = null;
+let currentLocationName = "";
+let selectedForSomeoneElse = false;
+let selectedVehicle = null;
+let pickupPlace = null;
+let destinationPlace = null;
+let searchTimers = {};
+
+const DEFAULT_PRICES = {
+  bike: 50,
+  auto: 80,
+  car4: 150,
+  car6: 220,
+  car8: 300
+};
+
+const VEHICLES = [
+  {id:"bike", icon:"🏍️", name:"Bike", seats:"1 passenger"},
+  {id:"auto", icon:"🛺", name:"Auto", seats:"Up to 3 passengers"},
+  {id:"car4", icon:"🚗", name:"Car", seats:"4 Seater"},
+  {id:"car6", icon:"🚙", name:"Car", seats:"6 Seater"},
+  {id:"car8", icon:"🚐", name:"Car", seats:"8 Seater"}
+];
+
+function $(id){ return document.getElementById(id); }
+
+function showMsg(text, ok=false){
+  const e = $("msg");
+  e.textContent = text;
+  e.className = "notice " + (ok ? "success" : "error");
+  e.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function escapeHtml(value){
+  return String(value || "").replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
+}
+
+function initLocation(){
+  if(!navigator.geolocation){
+    $("locationStatus").textContent = "📍 Location is not supported. Enter pickup manually.";
+    $("otherPersonBox").classList.remove("hidden");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      currentCoords = {lat:pos.coords.latitude, lon:pos.coords.longitude};
+      $("locationStatus").textContent = "📍 Current location detected";
+
+      try{
+        const place = await reverseGeocode(currentCoords.lat,currentCoords.lon);
+        currentLocationName = place.display_name || "Current location";
+      }catch(e){
+        currentLocationName = "Current location";
+      }
+
+      $("currentLocationText").textContent = currentLocationName;
+      $("currentLocationBox").classList.remove("hidden");
+      $("pickup").value = currentLocationName;
+      pickupPlace = {
+        display_name:currentLocationName,
+        lat:currentCoords.lat,
+        lon:currentCoords.lon,
+        source:"current"
+      };
+    },
+    () => {
+      $("locationStatus").textContent =
+        "📍 Location permission not available. Please search your pickup location.";
+      $("otherPersonBox").classList.remove("hidden");
+    },
+    {enableHighAccuracy:true, timeout:10000, maximumAge:60000}
+  );
+}
+
+async function reverseGeocode(lat,lon){
+  const url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" +
+    encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lon);
+  const r = await fetch(url,{headers:{"Accept":"application/json"}});
+  if(!r.ok) throw new Error("Reverse geocoding failed");
+  return await r.json();
+}
+
+function useCurrentLocation(){
+  if(!currentLocationName) return;
+  $("pickup").value = currentLocationName;
+  pickupPlace = {
+    display_name:currentLocationName,
+    lat:currentCoords?.lat,
+    lon:currentCoords?.lon,
+    source:"current"
+  };
+  $("otherPersonBox").classList.add("hidden");
+  $("pickupSuggestions").innerHTML = "";
+}
+
+function searchPlaces(which){
+  const input = $(which);
+  const box = $(which + "Suggestions");
+  const q = input.value.trim();
+
+  if(searchTimers[which]) clearTimeout(searchTimers[which]);
+  if(q.length < 3){
+    box.innerHTML = "";
+    return;
+  }
+
+  searchTimers[which] = setTimeout(async () => {
+    box.innerHTML = '<div class="suggestion loading">Searching locations...</div>';
+    try{
+      const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1" +
+        "&countrycodes=in&q=" + encodeURIComponent(q);
+      const r = await fetch(url,{headers:{"Accept":"application/json"}});
+      const data = await r.json();
+
+      if(!data.length){
+        box.innerHTML = '<div class="suggestion">No matching locations found.</div>';
+        return;
+      }
+
+      box.innerHTML = data.map((p,i) =>
+        '<button class="suggestion" type="button" onclick="selectPlace(\'' +
+        which + '\',' + i + ')">📍 ' + escapeHtml(p.display_name) + '</button>'
+      ).join("");
+      box._results = data;
+    }catch(e){
+      box.innerHTML = '<div class="suggestion">Location search failed. Please try again.</div>';
+    }
+  },350);
+}
+
+function selectPlace(which,index){
+  const box = $(which + "Suggestions");
+  const p = box._results?.[index];
+  if(!p) return;
+
+  const place = {
+    display_name:p.display_name,
+    lat:Number(p.lat),
+    lon:Number(p.lon),
+    source:"search"
+  };
+
+  $(which).value = p.display_name;
+  box.innerHTML = "";
+
+  if(which === "pickup"){
+    pickupPlace = place;
+    if(currentCoords && isFarFromCurrent(place)){
+      $("otherPersonBox").classList.remove("hidden");
+    }else{
+      $("otherPersonBox").classList.add("hidden");
+      selectedForSomeoneElse = false;
+      $("someonePhoneBox").classList.add("hidden");
+    }
+  }else{
+    destinationPlace = place;
+  }
+}
+
+function isFarFromCurrent(place){
+  if(!currentCoords || !place.lat || !place.lon) return false;
+  return distanceKm(currentCoords.lat,currentCoords.lon,place.lat,place.lon) > 0.5;
+}
+
+function distanceKm(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function setForSomeone(value,button){
+  selectedForSomeoneElse = value;
+  $("someonePhoneBox").classList.toggle("hidden",!value);
+  document.querySelectorAll(".choice-btn").forEach(b=>b.classList.remove("selected"));
+  if(button) button.classList.add("selected");
+}
+
+function confirmPickup(){
+  const p=$("pickup").value.trim();
+  if(!p){ showMsg("Please select a pickup location."); return; }
+
+  if(selectedForSomeoneElse){
+    const phone=$("passengerPhone").value.replace(/\D/g,"");
+    if(!/^[6-9]\d{9}$/.test(phone)){
+      showMsg("Please enter a valid 10-digit passenger mobile number.");
+      return;
+    }
+  }
+
+  $("destinationCard").classList.remove("hidden");
+  $("destination").focus();
+  $("destinationCard").scrollIntoView({behavior:"smooth"});
+}
+
+function confirmDestination(){
+  const d=$("destination").value.trim();
+  if(!d){ showMsg("Please select a destination."); return; }
+  if(d.length<3){ showMsg("Type at least 3 letters to select a destination."); return; }
+
+  if(!destinationPlace) destinationPlace={display_name:d,source:"typed"};
+
+  $("pickupSummary").textContent=$("pickup").value;
+  $("destinationSummary").textContent=$("destination").value;
+  renderVehicles();
+  $("vehiclesCard").classList.remove("hidden");
+  $("vehiclesCard").scrollIntoView({behavior:"smooth"});
+}
+
+function getPrices(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("rc_ride_prices") || "{}");
+    return {...DEFAULT_PRICES,...saved};
+  }catch(e){ return {...DEFAULT_PRICES}; }
+}
+
+function money(v){
+  return "₹" + Number(v || 0).toLocaleString("en-IN");
+}
+
+function renderVehicles(){
+  const prices=getPrices();
+  $("vehicleList").innerHTML=VEHICLES.map(v =>
+    '<button class="vehicle-card" type="button" onclick="selectVehicle(\''+v.id+'\',this)">' +
+      '<div class="vehicle-icon">'+v.icon+'</div>' +
+      '<div class="vehicle-info"><b>'+v.name+'</b><span>'+v.seats+'</span></div>' +
+      '<div class="vehicle-price">'+money(prices[v.id])+'</div>' +
+    '</button>'
+  ).join("");
+  selectedVehicle=null;
+}
+
+function selectVehicle(id,button){
+  selectedVehicle=id;
+  document.querySelectorAll(".vehicle-card").forEach(c=>c.classList.remove("selected"));
+  if(button) button.classList.add("selected");
+}
+
+function confirmVehicle(){
+  if(!selectedVehicle){ showMsg("Please select a vehicle."); return; }
+
+  const prices=getPrices();
+  const passengerPhone=selectedForSomeoneElse
+    ? $("passengerPhone").value.replace(/\D/g,"") : null;
+
+  const ride={
+    pickup:$("pickup").value.trim(),
+    destination:$("destination").value.trim(),
+    pickupCoords:pickupPlace ? {lat:pickupPlace.lat||null,lon:pickupPlace.lon||null}:null,
+    destinationCoords:destinationPlace ? {lat:destinationPlace.lat||null,lon:destinationPlace.lon||null}:null,
+    forSomeoneElse:selectedForSomeoneElse,
+    passengerPhone,
+    vehicle:selectedVehicle,
+    price:prices[selectedVehicle],
+    status:"Searching",
+    createdAt:new Date().toISOString()
+  };
+
+  localStorage.setItem("rc_last_ride",JSON.stringify(ride));
+  showMsg("Ride details saved. Driver matching can be connected in the next backend step.",true);
+}
+
+initLocation();
+</script>
+
+<style>
+.hidden{display:none!important}
+.location-status{margin:10px 0 14px;padding:12px 14px;border-radius:12px;background:#eef7ff;color:#0757a0;font-size:14px}
+.current-location{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px;margin-bottom:15px;border:1px solid #dbe5ee;border-radius:14px;background:#f7fbff}
+.current-location b{display:block;margin-bottom:4px}
+.current-location div div{font-size:13px;color:#667788;line-height:1.35}
+.small-btn{border:0;border-radius:10px;padding:9px 14px;background:#0757a0;color:#fff;font-weight:700}
+.suggestions{position:relative;z-index:20;background:#fff;border:1px solid #dbe2e9;border-radius:12px;margin-top:5px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.suggestion{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #edf0f3;background:#fff;padding:13px;color:#20344a;font-size:14px;line-height:1.35}
+.suggestion:last-child{border-bottom:0}
+.loading{color:#687789}
+.other-person{margin-top:14px;padding:15px;border-radius:14px;background:#f5f9fd;border:1px solid #dce7f0}
+.question{font-weight:700;margin-bottom:11px}
+.choice-row{display:flex;gap:8px}
+.choice-btn{flex:1;border:1px solid #cfdbe6;background:#fff;border-radius:10px;padding:11px 8px;font-weight:600;color:#20344a}
+.choice-btn.selected{background:#0757a0;color:#fff;border-color:#0757a0}
+.route-summary{background:#f5f9fd;border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.route-summary div{margin:6px 0}
+.route-summary b{display:block;font-size:12px;color:#6d7d8d;text-transform:uppercase}
+.route-summary span{display:block;font-size:14px;color:#20344a;margin-top:2px}
+.vehicle-list{display:grid;gap:10px}
+.vehicle-card{width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:2px solid #e0e7ee;border-radius:15px;padding:13px;box-sizing:border-box}
+.vehicle-card.selected{border-color:#0757a0;background:#eef7ff}
+.vehicle-icon{font-size:30px;width:42px;text-align:center}
+.vehicle-info{flex:1}
+.vehicle-info b{display:block;font-size:16px;color:#162b42}
+.vehicle-info span{display:block;font-size:12px;color:#718092;margin-top:3px}
+.vehicle-price{font-weight:800;color:#0757a0;font-size:16px}
+.login-note{margin-top:12px}
+</style>
+</body>
+</html>
