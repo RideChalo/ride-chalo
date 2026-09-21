@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0757a0">
+<title>Ride Chalo - Admin Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f6fa;color:#14283f}
+.app{max-width:480px;margin:auto;min-height:100vh;background:#fff;padding-bottom:78px}
+.header{background:linear-gradient(135deg,#064f93,#087dcc);color:#fff;padding:18px 16px 22px;border-radius:0 0 24px 24px}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:22px;font-weight:800}
+.admin{font-size:12px;opacity:.9;margin-top:4px}
+.icon{width:40px;height:40px;border:0;border-radius:50%;background:#fff;color:#0757a0;font-size:19px}
+.content{padding:17px}
+.title{font-size:21px;font-weight:800}.sub{font-size:12px;color:#728096;margin-top:5px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.stat{background:#f6f9fc;border:1px solid #e1e8f0;border-radius:15px;padding:14px}
+.stat b{font-size:24px;color:#0757a0;display:block}.stat span{font-size:11px;color:#718096}
+.section{margin-top:21px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.section-head h3{font-size:17px}.section-head button{border:0;background:none;color:#087dcc;font-size:12px}
+.card{border:1px solid #e0e7ef;border-radius:16px;background:#fff;padding:14px;margin-bottom:10px;box-shadow:0 3px 12px rgba(20,50,80,.05)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.info{display:flex;align-items:center;gap:11px}
+.avatar{width:43px;height:43px;border-radius:13px;background:#e8f3ff;display:flex;align-items:center;justify-content:center;font-size:21px}
+.name{font-weight:700;font-size:14px}.muted{font-size:11px;color:#758398;margin-top:3px}
+.badge{font-size:10px;font-weight:700;padding:5px 8px;border-radius:20px;background:#fff4d8;color:#986700}
+.badge.green{background:#e7f8ee;color:#147442}.badge.red{background:#ffe8e8;color:#a52d2d}
+.actions{display:flex;gap:7px;margin-top:12px}
+.btn{flex:1;border:0;border-radius:10px;padding:10px 7px;font-weight:700;font-size:11px}
+.primary{background:#0757a0;color:#fff}.light{background:#eaf3fb;color:#0757a0}.danger{background:#ffe9e9;color:#a52d2d}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.menu button{text-align:left;border:1px solid #e0e7ef;background:#fff;border-radius:15px;padding:14px;font-size:13px;font-weight:700;color:#20364e}
+.menu button span{display:block;font-size:22px;margin-bottom:7px}
+.field{background:#f7f9fc;border:1px solid #e1e7ee;border-radius:12px;padding:10px;margin-bottom:9px}
+.field label{display:block;font-size:10px;color:#718096;margin-bottom:5px}.field input,.field select{width:100%;border:0;background:transparent;outline:0;font-size:13px}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:#fff;border-top:1px solid #e1e7ee;display:flex;justify-content:space-around;padding:9px 2px;z-index:20}
+.nav{border:0;background:none;color:#718096;font-size:10px}.nav b{display:block;font-size:19px;margin-bottom:2px}.nav.active{color:#0757a0}
+.panel{display:none}.panel.active{display:block}
+.back{border:0;background:#eef4f9;padding:8px 12px;border-radius:10px;color:#0757a0;font-weight:700;margin-bottom:14px}
+.notice{background:#eef7ff;border-left:4px solid #087dcc;padding:11px;border-radius:9px;font-size:11px;color:#53657b;margin-bottom:12px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;align-items:flex-end;justify-content:center}
+.modal-box{width:min(480px,100%);background:#fff;border-radius:23px 23px 0 0;padding:19px;max-height:85vh;overflow:auto}
+.close{float:right;border:0;border-radius:50%;width:33px;height:33px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+ <div class="header-row">
+  <div><div class="logo">🚗 Ride Chalo</div><div class="admin">Admin Control Panel</div></div>
+  <button class="icon" onclick="alert('Admin notifications: 3 pending actions')">🔔</button>
+ </div>
+</header>
+
+<main class="content">
+<section id="dashboard" class="panel active">
+ <div class="title">Dashboard</div><div class="sub">Manage rides, rentals, drivers and platform settings.</div>
+ <div class="stats">
+  <div class="stat"><b id="drivers">24</b><span>Verified Drivers</span></div>
+  <div class="stat"><b id="users">186</b><span>Users</span></div>
+  <div class="stat"><b id="rides">32</b><span>Today's Rides</span></div>
+  <div class="stat"><b id="rentals">18</b><span>Active Rentals</span></div>
+ </div>
+
+ <div class="section"><div class="section-head"><h3>Pending approvals</h3><button onclick="showPanel('drivers')">View all</button></div>
+  <div class="card"><div class="row"><div class="info"><div class="avatar">👨</div><div><div class="name">Driver verification</div><div class="muted">3 documents waiting for review</div></div></div><span class="badge">3 Pending</span></div>
+  <div class="actions"><button class="btn primary" onclick="showPanel('drivers')">Review</button></div></div>
+  <div class="card"><div class="row"><div class="info"><div class="avatar">🏍️</div><div><div class="name">Rental requests</div><div class="muted">5 requests waiting for owners</div></div></div><span class="badge">5 New</span></div></div>
+ </div>
+
+ <div class="section"><div class="section-head"><h3>Management</h3></div>
+  <div class="menu">
+   <button onclick="showPanel('drivers')"><span>👨‍✈️</span>Drivers</button>
+   <button onclick="showPanel('vehicles')"><span>🏍️</span>Vehicles</button>
+   <button onclick="showPanel('rides')"><span>🚕</span>Rides</button>
+   <button onclick="showPanel('rentals')"><span>🔑</span>Rentals</button>
+   <button onclick="showPanel('locations')"><span>📍</span>Locations</button>
+   <button onclick="showPanel('settings')"><span>⚙️</span>Settings</button>
+  </div>
+ </div>
+</section>
+
+<section id="drivers" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Driver Management</div><div class="sub">Verify documents, vehicles and driver status.</div>
+<div class="notice">Face verification and document checks should be connected to your backend before production use.</div>
+<div class="card"><div class="row"><div class="info"><div class="avatar">👨</div><div><div class="name">Ravi Kumar</div><div class="muted">RC1024 • Bike • Khammam</div></div></div><span class="badge">Pending</span></div><div class="actions"><button class="btn primary" onclick="approve(this)">Approve</button><button class="btn danger" onclick="reject(this)">Reject</button></div></div>
+<div class="card"><div class="row"><div class="info"><div class="avatar">👩</div><div><div class="name">Sowmya</div><div class="muted">RC1025 • Car • Khammam</div></div></div><span class="badge green">Verified</span></div></div>
+</section>
+
+<section id="vehicles" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Vehicle Management</div><div class="sub">Add or manage bikes and cars available for rentals.</div>
+<div class="card"><div class="row"><div><div class="name">🏍️ Honda Activa</div><div class="muted">Owner: Ravi • 1.2 km away • ₹99/day</div></div><span class="badge green">Available</span></div><div class="actions"><button class="btn light" onclick="editVehicle()">Edit</button><button class="btn danger" onclick="alert('Vehicle marked unavailable')">Disable</button></div></div>
+<div class="card"><div class="row"><div><div class="name">🚗 Swift</div><div class="muted">Owner: Sowmya • ₹799/day</div></div><span class="badge green">Available</span></div><div class="actions"><button class="btn light" onclick="editVehicle()">Edit</button><button class="btn danger" onclick="alert('Vehicle marked unavailable')">Disable</button></div></div>
+</section>
+
+<section id="rides" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Ride Management</div><div class="sub">Monitor active rides and completed trips.</div>
+<div class="card"><div class="row"><div><div class="name">RC-5001 • User #U102</div><div class="muted">Driver: Ravi • Khammam → Wyra</div></div><span class="badge green">Live</span></div><div class="actions"><button class="btn primary" onclick="alert('Live location tracking will open here.')">Track location</button><button class="btn light" onclick="alert('Emergency contact panel')">Safety</button></div></div>
+<div class="card"><div class="row"><div><div class="name">RC-4998 • User #U098</div><div class="muted">Completed • ₹240</div></div><span class="badge">Completed</span></div></div>
+</section>
+
+<section id="rentals" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Rental Management</div><div class="sub">Manage bike/car rental requests and owners.</div>
+<div class="card"><div class="row"><div><div class="name">🏍️ Honda Activa</div><div class="muted">User U121 • 2 days • Pickup: Khammam</div></div><span class="badge">Requested</span></div><div class="actions"><button class="btn primary" onclick="alert('Rental approved and owner notified.')">Approve</button><button class="btn danger" onclick="alert('Rental request rejected.')">Reject</button></div></div>
+</section>
+
+<section id="locations" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Locations</div><div class="sub">Add multiple cities, pickup points and popular tourist places.</div>
+<div class="field"><label>LOCATION / CITY</label><input id="newLocation" placeholder="e.g. Khammam"></div>
+<div class="field"><label>PICKUP POINT</label><input placeholder="e.g. Bus Stand"></div>
+<button class="btn primary" style="width:100%" onclick="addLocation()">+ Add location</button>
+<div id="locationList" class="section">
+<div class="card"><div class="row"><div><div class="name">📍 Khammam</div><div class="muted">3 pickup points • Active</div></div><span class="badge green">Active</span></div></div>
+</div>
+</section>
+
+<section id="settings" class="panel">
+<button class="back" onclick="showPanel('dashboard')">← Dashboard</button>
+<div class="title">Platform Settings</div><div class="sub">Admin-controlled commission and subscription settings.</div>
+<div class="field"><label>RIDE COMMISSION %</label><input id="commission" type="number" value="10"></div>
+<div class="field"><label>RENTAL COMMISSION %</label><input type="number" value="10"></div>
+<div class="field"><label>USER SUBSCRIPTION PRICE</label><input type="number" value="499"></div>
+<div class="field"><label>DRIVER SUBSCRIPTION PRICE</label><input type="number" value="499"></div>
+<div class="field"><label>SUBSCRIPTION DURATION (DAYS)</label><input type="number" value="30"></div>
+<button class="btn primary" style="width:100%" onclick="saveSettings()">Save settings</button>
+</section>
+</main>
+
+<nav class="bottom">
+<button class="nav active" onclick="showPanel('dashboard')"><b>⌂</b>Dashboard</button>
+<button class="nav" onclick="showPanel('drivers')"><b>👨‍✈️</b>Drivers</button>
+<button class="nav" onclick="showPanel('rides')"><b>🚕</b>Rides</button>
+<button class="nav" onclick="showPanel('rentals')"><b>🔑</b>Rentals</button>
+</nav>
+</div>
+
+<script>
+function showPanel(id){
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ window.scrollTo(0,0);
+}
+function approve(btn){
+ const badge=btn.closest('.card').querySelector('.badge');
+ badge.textContent='Verified';badge.className='badge green';
+ btn.parentElement.remove();
+}
+function reject(btn){
+ const card=btn.closest('.card');card.style.opacity='.5';
+ alert('Driver application marked for rejection review.');
+}
+function editVehicle(){alert('Vehicle edit form can be connected to the database here.')}
+function addLocation(){
+ const v=document.getElementById('newLocation').value.trim();
+ if(!v){alert('Enter a location.');return}
+ document.getElementById('locationList').insertAdjacentHTML('beforeend','<div class="card"><div class="row"><div><div class="name">📍 '+v+'</div><div class="muted">New location • Active</div></div><span class="badge green">Active</span></div></div>');
+ document.getElementById('newLocation').value='';
+}
+function saveSettings(){alert('Settings saved locally for demo. Connect Supabase/backend for permanent storage.')}
+</script>
+</body>
+</html>
