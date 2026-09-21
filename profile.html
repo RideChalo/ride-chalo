@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0757A0"><title>Profile - Ride Chalo</title><link rel="stylesheet" href="./styles.css"></head>
+<body><div class="app">
+<header class="header"><div class="header-row"><div><h2>👤 My Profile</h2><small>Account settings</small></div><button class="iconbtn" onclick="location.href='home.html'">⌂</button></div></header>
+<main class="main">
+<div class="card"><label class="label">Mobile Number</label><input class="input" id="phone" readonly></div>
+<div class="section list">
+<div class="list-item">📋 <div><b>My Rides</b><div class="muted">Ride history will appear here</div></div></div>
+<div class="list-item">💳 <div><b>Payments</b><div class="muted">Payment methods and history</div></div></div>
+<div class="list-item">🛡️ <div><b>Safety</b><div class="muted">Emergency and ride sharing</div></div></div>
+</div>
+<button class="btn danger" onclick="logout()">Logout</button>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./supabase-config.js"></script>
+<script>
+phone.value=localStorage.getItem('rc_pending_phone')||'';
+async function logout(){if(supabaseReady())await supabaseClient.auth.signOut();localStorage.removeItem('rc_logged_in');localStorage.removeItem('rc_pending_phone');location.href='index.html'}
+</script></body></html>

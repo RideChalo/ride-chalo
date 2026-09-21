@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0757A0"><title>Verify OTP - Ride Chalo</title><link rel="stylesheet" href="./styles.css"></head>
+<body><div class="app">
+<div class="header"><div class="header-row"><div class="header-brand"><img src="./ride-chalo-logo.png">Ride Chalo</div></div></div>
+<div class="content center">
+<h2>Verify mobile number</h2><p class="muted" style="margin-top:8px">Enter the 6-digit OTP sent to <b id="phoneText"></b></p>
+<div class="otp">
+<input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+<input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+</div>
+<button class="btn" onclick="verifyOtp()">Verify & Continue</button>
+<button class="btn secondary" style="margin-top:10px" onclick="resend()">Resend OTP</button>
+<div id="msg" class="notice hidden"></div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
+<script>
+const phone=localStorage.getItem('rc_pending_phone')||'';
+document.getElementById('phoneText').textContent=phone||'your mobile number';
+const boxes=[...document.querySelectorAll('.otp input')];
+boxes.forEach((b,i)=>b.addEventListener('input',()=>{b.value=b.value.replace(/\D/g,'');if(b.value&&boxes[i+1])boxes[i+1].focus()}));
+function msg(t,ok=false){const e=document.getElementById('msg');e.textContent=t;e.className='notice '+(ok?'success':'');}
+async function verifyOtp(){
+ const token=boxes.map(x=>x.value).join('');
+ if(token.length!==6){msg('Please enter the complete 6-digit OTP.');return;}
+ if(!supabaseReady()){localStorage.setItem('rc_logged_in','1');location.href='home.html';return;}
+ const {data,error}=await supabaseClient.auth.verifyOtp({phone,token,type:'sms'});
+ if(error){msg(error.message);return;}
+ localStorage.setItem('rc_logged_in','1');location.href='home.html';
+}
+async function resend(){
+ if(!supabaseReady()){msg('Demo mode: OTP resend is not connected yet.');return;}
+ const {error}=await supabaseClient.auth.signInWithOtp({phone});
+ msg(error?error.message:'OTP sent again.',!error);
+}
+</script></body></html>
