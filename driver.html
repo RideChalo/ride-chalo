@@ -1,1 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0757a0">
+<title>Ride Chalo - Driver</title>
 
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#eef4f8;
+  color:#10243e;
+}
+
+.app{
+  max-width:480px;
+  min-height:100vh;
+  margin:auto;
+  background:#fff;
+  position:relative;
+  padding-bottom:80px;
+}
+
+.header{
+  background:linear-gradient(135deg,#0757a0,#087dc9);
+  color:#fff;
+  padding:20px;
+  border-radius:0 0 24px 24px;
+}
+
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:#fff;
+  color:#0757a0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  font-weight:bold;
+}
+
+.title{
+  flex:1;
+  margin-left:12px;
+}
+
+.title h2{
+  font-size:21px;
+}
+
+.title p{
+  font-size:12px;
+  opacity:.9;
+  margin-top:4px;
+}
+
+.status{
+  background:#d9ffe5;
+  color:#08752d;
+  padding:7px 10px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.content{
+  padding:20px;
+}
+
+.screen{
+  display:none;
+}
+
+.screen.active{
+  display:block;
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+  border:1px solid #e7edf2;
+}
+
+.card h3{
+  font-size:17px;
+  margin-bottom:8px;
+}
+
+.card p{
+  font-size:13px;
+  color:#637386;
+  line-height:1.5;
+}
+
+.input{
+  width:100%;
+  padding:13px;
+  border:1px solid #d7e0e8;
+  border-radius:11px;
+  margin:7px 0 12px;
+  font-size:14px;
+  outline:none;
+}
+
+.input:focus{
+  border-color:#087dc9;
+}
+
+label{
+  font-size:12px;
+  font-weight:bold;
+  color:#44576a;
+}
+
+.btn{
+  width:100%;
+  border:none;
+  padding:14px;
+  border-radius:12px;
+  background:#087dc9;
+  color:#fff;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:8px;
+}
+
+.btn.secondary{
+  background:#edf5fb;
+  color:#0757a0;
+}
+
+.btn.success{
+  background:#16a05d;
+}
+
+.btn.warning{
+  background:#f39c12;
+}
+
+.btn.danger{
+  background:#dc3545;
+}
+
+.back{
+  background:none;
+  border:none;
+  color:#0757a0;
+  font-weight:bold;
+  margin-bottom:15px;
+  cursor:pointer;
+}
+
+.steps{
+  display:flex;
+  gap:5px;
+  margin-bottom:20px;
+}
+
+.step{
+  flex:1;
+  height:5px;
+  background:#dce5ec;
+  border-radius:10px;
+}
+
+.step.done{
+  background:#087dc9;
+}
+
+.upload{
+  border:2px dashed #b9cbd8;
+  padding:20px;
+  text-align:center;
+  border-radius:14px;
+  margin:8px 0 15px;
+}
+
+.upload input{
+  margin-top:10px;
+  width:100%;
+}
+
+.vehicle-options{
+  display:flex;
+  gap:10px;
+}
+
+.vehicle{
+  flex:1;
+  border:1px solid #d7e0e8;
+  border-radius:14px;
+  padding:18px 8px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.vehicle.selected{
+  border:2px solid #087dc9;
+  background:#eef8ff;
+}
+
+.vehicle-icon{
+  font-size:30px;
+  margin-bottom:7px;
+}
+
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.stat{
+  padding:16px;
+  border-radius:15px;
+  background:#f3f8fc;
+}
+
+.stat strong{
+  display:block;
+  font-size:22px;
+  color:#0757a0;
+  margin-top:5px;
+}
+
+.ride-request{
+  border:2px solid #087dc9;
+  background:#f5fbff;
+}
+
+.request-row{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  border-bottom:1px solid #e3edf4;
+  font-size:13px;
+}
+
+.request-row:last-child{
+  border-bottom:none;
+}
+
+.otp{
+  font-size:30px;
+  letter-spacing:8px;
+  text-align:center;
+  font-weight:bold;
+  color:#0757a0;
+  margin:15px 0;
+}
+
+.map{
+  height:180px;
+  border-radius:16px;
+  background:
+    linear-gradient(135deg,#dcefd8,#eef5e8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#47714d;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.progress{
+  height:10px;
+  background:#e4ebf0;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0;
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  width:65%;
+  background:#087dc9;
+}
+
+.face-box{
+  width:190px;
+  height:190px;
+  border:4px solid #087dc9;
+  border-radius:50%;
+  margin:20px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:60px;
+  background:#eef8ff;
+}
+
+.verify-status{
+  text-align:center;
+  padding:12px;
+  border-radius:12px;
+  background:#fff8df;
+  color:#8b6800;
+  font-size:13px;
+  margin-bottom:15px;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  background:#fff;
+  border-top:1px solid #dfe7ed;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 5px;
+  z-index:20;
+}
+
+.nav-btn{
+  border:none;
+  background:none;
+  font-size:11px;
+  color:#637386;
+  cursor:pointer;
+}
+
+.nav-btn.active{
+  color:#087dc9;
+  font-weight:bold;
+}
+
+.nav-icon{
+  display:block;
+  font-size:21px;
+  margin-bottom:3px;
+}
+
+.alert{
+  padding:13px;
+  border-radius:12px;
+  background:#eaf6ff;
+  color:#0757a0;
+  font-size:13px;
+  margin-bottom:15px;
+}
+
+.success-box{
+  background:#e9fff1;
+  color:#08752d;
+  padding:15px;
+  border-radius:14px;
+  text-align:center;
+  margin-bottom:15px;
+}
+
+@media(max-width:360px){
+  .content{
+    padding:15px;
+  }
+
+  .header{
+    padding:16px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <div class="logo">RC</div>
+
+    <div class="title">
+      <h2>Ride Chalo</h2>
+      <p>Driver Partner</p>
+    </div>
+
+    <div class="status" id="driverStatus">
+      OFFLINE
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ================= REGISTRATION ================= -->
+
+<div id="registration" class="screen active">
+
+  <div class="card">
+    <h3>Driver Registration</h3>
+    <p>Register as a Ride Chalo driver partner.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step done"></div>
+    <div class="step"></div>
+    <div class="step"></div>
+  </div>
+
+  <label>Full Name</label>
+  <input class="input" id="driverName" placeholder="Enter full name">
+
+  <label>Mobile Number</label>
+  <input class="input" id="driverMobile" type="tel"
+         placeholder="Enter mobile number">
+
+  <label>Email</label>
+  <input class="input" id="driverEmail"
+         placeholder="Enter email">
+
+  <label>City / Location</label>
+  <input class="input" id="driverCity"
+         placeholder="Enter your city">
+
+  <button class="btn" onclick="nextRegistration()">
+    Continue
+  </button>
+
+</div>
+
+
+<!-- ================= VEHICLE ================= -->
+
+<div id="vehicle" class="screen">
+
+  <button class="back" onclick="showScreen('registration')">
+    ← Back
+  </button>
+
+  <div class="card">
+    <h3>Vehicle Details</h3>
+    <p>Select your vehicle type.</p>
+  </div>
+
+  <div class="vehicle-options">
+
+    <div class="vehicle" onclick="selectVehicle(this,'Bike')">
+      <div class="vehicle-icon">🏍️</div>
+      <b>Bike</b>
+    </div>
+
+    <div class="vehicle" onclick="selectVehicle(this,'Car')">
+      <div class="vehicle-icon">🚗</div>
+      <b>Car</b>
+    </div>
+
+  </div>
+
+  <br>
+
+  <label>Vehicle Number</label>
+  <input class="input" id="vehicleNumber"
+         placeholder="Example: TS 00 AB 0000">
+
+  <label>Vehicle Model</label>
+  <input class="input" id="vehicleModel"
+         placeholder="Enter vehicle model">
+
+  <button class="btn" onclick="nextDocuments()">
+    Continue
+  </button>
+
+</div>
+
+
+<!-- ================= DOCUMENTS ================= -->
+
+<div id="documents" class="screen">
+
+  <button class="back" onclick="showScreen('vehicle')">
+    ← Back
+  </button>
+
+  <div class="card">
+    <h3>Upload Documents</h3>
+    <p>Admin verification is required before receiving rides.</p>
+  </div>
+
+  <label>Driving Licence</label>
+  <div class="upload">
+    📄 Upload Driving Licence
+    <input type="file" accept="image/*,.pdf">
+  </div>
+
+  <label>RC Document</label>
+  <div class="upload">
+    📄 Upload RC
+    <input type="file" accept="image/*,.pdf">
+  </div>
+
+  <label>Vehicle Photo</label>
+  <div class="upload">
+    🏍️ Upload Vehicle Photo
+    <input type="file" accept="image/*">
+  </div>
+
+  <label>Profile Photo</label>
+  <div class="upload">
+    👤 Upload Profile Photo
+    <input type="file" accept="image/*">
+  </div>
+
+  <button class="btn" onclick="submitVerification()">
+    Submit for Admin Verification
+  </button>
+
+</div>
+
+
+<!-- ================= VERIFICATION ================= -->
+
+<div id="verification" class="screen">
+
+  <div class="card">
+    <h3>Verification Pending</h3>
+
+    <div class="verify-status">
+      ⏳ Your documents are waiting for admin verification.
+    </div>
+
+    <p>
+      Ride requests will become available after your account
+      and vehicle documents are approved.
+    </p>
+
+    <br>
+
+    <button class="btn" onclick="simulateApproval()">
+      Demo: Admin Approve
+    </button>
+  </div>
+
+</div>
+
+
+<!-- ================= DASHBOARD ================= -->
+
+<div id="dashboard" class="screen">
+
+  <div class="alert">
+    🛡️ Your account is verified. Complete security verification
+    when required to continue receiving rides.
+  </div>
+
+  <div class="card">
+    <h3>Driver Dashboard</h3>
+    <p id="welcomeDriver">Welcome Driver</p>
+
+    <br>
+
+    <button class="btn success" id="onlineBtn"
+            onclick="toggleOnline()">
+      Go Online
+    </button>
+  </div>
+
+  <div class="dashboard-grid">
+
+    <div class="stat">
+      Today's Rides
+      <strong>0</strong>
+    </div>
+
+    <div class="stat">
+      Today's Earnings
+      <strong>₹0</strong>
+    </div>
+
+    <div class="stat">
+      Rating
+      <strong>5.0 ⭐</strong>
+    </div>
+
+    <div class="stat">
+      Commission
+      <strong id="commissionText">Admin Set</strong>
+    </div>
+
+  </div>
+
+  <br>
+
+  <div class="card">
+    <h3>Driver Subscription</h3>
+    <p>
+      Subscription plans can reduce or waive company commission
+      for the selected period.
+    </p>
+
+    <button class="btn secondary"
+            onclick="showScreen('subscription')">
+      View Subscription Plans
+    </button>
+  </div>
+
+  <div id="rideNotification"></div>
+
+</div>
+
+
+<!-- ================= RIDE REQUEST ================= -->
+
+<div id="rideRequest" class="screen">
+
+  <div class="card ride-request">
+
+    <h3>🚨 New Ride Request</h3>
+
+    <div class="request-row">
+      <span>Pickup</span>
+      <b>2.4 KM away</b>
+    </div>
+
+    <div class="request-row">
+      <span>Customer</span>
+      <b>Ride Chalo User</b>
+    </div>
+
+    <div class="request-row">
+      <span>Distance</span>
+      <b>8.5 KM</b>
+    </div>
+
+    <div class="request-row">
+      <span>Estimated Fare</span>
+      <b>₹145</b>
+    </div>
+
+    <div class="request-row">
+      <span>Company Commission</span>
+      <b>As per Admin Rule</b>
+    </div>
+
+    <button class="btn success"
+            onclick="acceptRide()">
+      Accept Ride
+    </button>
+
+    <button class="btn secondary"
+            onclick="showScreen('dashboard')">
+      Reject
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= REACH RIDER ================= -->
+
+<div id="reachRider" class="screen">
+
+  <div class="card">
+
+    <h3>📍 Reach Pickup Location</h3>
+
+    <div class="map">
+      DRIVER → RIDER
+    </div>
+
+    <div class="request-row">
+      <span>Rider Location</span>
+      <b>2.4 KM</b>
+    </div>
+
+    <br>
+
+    <button class="btn success"
+            onclick="showScreen('otp')">
+      I Reached Rider
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= OTP ================= -->
+
+<div id="otp" class="screen">
+
+  <div class="card">
+
+    <h3>🔐 Enter Ride OTP</h3>
+
+    <p>
+      Ask the rider for the 4-digit OTP to start the ride.
+    </p>
+
+    <div class="otp">••••</div>
+
+    <input class="input"
+           id="otpInput"
+           maxlength="4"
+           inputmode="numeric"
+           placeholder="Enter 4 digit OTP">
+
+    <button class="btn"
+            onclick="verifyOTP()">
+      Verify & Start Ride
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= ACTIVE RIDE ================= -->
+
+<div id="activeRide" class="screen">
+
+  <div class="card">
+
+    <h3>🚗 Ride In Progress</h3>
+
+    <div class="map">
+      LIVE RIDE LOCATION
+    </div>
+
+    <div class="request-row">
+      <span>Ride Status</span>
+      <b style="color:#08752d;">ACTIVE</b>
+    </div>
+
+    <div class="request-row">
+      <span>Distance</span>
+      <b>4.7 KM</b>
+    </div>
+
+    <div class="request-row">
+      <span>Current Fare</span>
+      <b>₹110</b>
+    </div>
+
+    <div class="progress">
+      <span></span>
+    </div>
+
+    <p>
+      Location tracking is active while the ride is running.
+    </p>
+
+    <br>
+
+    <button class="btn success"
+            onclick="endRide()">
+      End Ride
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= PAYMENT ================= -->
+
+<div id="payment" class="screen">
+
+  <div class="card">
+
+    <h3>💳 Ride Payment</h3>
+
+    <div class="request-row">
+      <span>Ride Fare</span>
+      <b>₹145</b>
+    </div>
+
+    <div class="request-row">
+      <span>Company Commission</span>
+      <b>Admin Rule</b>
+    </div>
+
+    <div class="request-row">
+      <span>Driver Amount</span>
+      <b>Calculated</b>
+    </div>
+
+    <br>
+
+    <button class="btn success"
+            onclick="completePayment()">
+      Payment Completed
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= SECURITY ================= -->
+
+<div id="security" class="screen">
+
+  <div class="card">
+
+    <h3>🛡️ Driver Security Verification</h3>
+
+    <div class="verify-status">
+      Security verification required before your next rides.
+    </div>
+
+    <div class="face-box">
+      👤
+    </div>
+
+    <p style="text-align:center;">
+      Position your face inside the circle.
+    </p>
+
+    <button class="btn"
+            onclick="startFaceVerification()">
+      Verify My Face
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ================= SECURITY RESULT ================= -->
+
+<div id="securityResult" class="screen">
+
+  <div class="success-box">
+
+    <h3>✓ Face Verified</h3>
+
+    <p>
+      Identity matched successfully.
+      You can continue receiving rides.
+    </p>
+
+  </div>
+
+  <button class="btn success"
+          onclick="showScreen('dashboard')">
+    Continue to Dashboard
+  </button>
+
+</div>
+
+
+<!-- ================= SUBSCRIPTION ================= -->
+
+<div id="subscription" class="screen">
+
+  <button class="back" onclick="showScreen('dashboard')">
+    ← Back
+  </button>
+
+  <div class="card">
+
+    <h3>Driver Subscription</h3>
+
+    <p>
+      Subscription offers and commission rules are controlled
+      by the Ride Chalo Admin Panel.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Starter Driver</h3>
+    <p>Regular company commission applies.</p>
+
+    <button class="btn secondary">
+      Current Plan
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Driver Plus</h3>
+    <p>
+      Reduced commission for the selected subscription period.
+    </p>
+
+    <button class="btn"
+            onclick="subscribeDriver('Driver Plus')">
+      Subscribe
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Premium Driver</h3>
+    <p>
+      Admin-defined commission benefits and promotional offers.
+    </p>
+
+    <button class="btn"
+            onclick="subscribeDriver('Premium Driver')">
+      Subscribe
+    </button>
+
+  </div>
+
+</div>
+
+</div>
+
+
+<!-- ================= BOTTOM NAV ================= -->
+
+<div class="bottom-nav">
+
+  <button class="nav-btn active"
+          onclick="showScreen('dashboard')">
+    <span class="nav-icon">🏠</span>
+    Home
+  </button>
+
+  <button class="nav-btn"
+          onclick="requestDemoRide()">
+    <span class="nav-icon">🚗</span>
+    Rides
+  </button>
+
+  <button class="nav-btn"
+          onclick="showScreen('subscription')">
+    <span class="nav-icon">⭐</span>
+    Plan
+  </button>
+
+  <button class="nav-btn"
+          onclick="showScreen('security')">
+    <span class="nav-icon">🛡️</span>
+    Security
+  </button>
+
+</div>
+
+
+<script>
+
+let selectedVehicle = "";
+let driverOnline = false;
+
+function showScreen(id){
+
+  document.querySelectorAll(".screen")
+    .forEach(screen => {
+      screen.classList.remove("active");
+    });
+
+  const screen = document.getElementById(id);
+
+  if(screen){
+    screen.classList.add("active");
+    window.scrollTo(0,0);
+  }
+}
+
+
+function nextRegistration(){
+
+  const name = document.getElementById("driverName").value.trim();
+
+  if(!name){
+    alert("Please enter driver name");
+    return;
+  }
+
+  showScreen("vehicle");
+}
+
+
+function selectVehicle(element,type){
+
+  document.querySelectorAll(".vehicle")
+    .forEach(v => v.classList.remove("selected"));
+
+  element.classList.add("selected");
+
+  selectedVehicle = type;
+}
+
+
+function nextDocuments(){
+
+  if(!selectedVehicle){
+    alert("Please select Bike or Car");
+    return;
+  }
+
+  const number =
+    document.getElementById("vehicleNumber").value.trim();
+
+  if(!number){
+    alert("Please enter vehicle number");
+    return;
+  }
+
+  showScreen("documents");
+}
+
+
+function submitVerification(){
+
+  showScreen("verification");
+
+}
+
+
+function simulateApproval(){
+
+  const name =
+    document.getElementById("driverName").value || "Driver";
+
+  document.getElementById("welcomeDriver").innerText =
+    "Welcome " + name;
+
+  document.getElementById("driverStatus").innerText =
+    "VERIFIED";
+
+  document.getElementById("driverStatus").style.background =
+    "#d9ffe5";
+
+  document.getElementById("driverStatus").style.color =
+    "#08752d";
+
+  showScreen("dashboard");
+}
+
+
+function toggleOnline(){
+
+  driverOnline = !driverOnline;
+
+  const btn = document.getElementById("onlineBtn");
+  const status = document.getElementById("driverStatus");
+
+  if(driverOnline){
+
+    btn.innerText = "Go Offline";
+    btn.classList.remove("success");
+    btn.classList.add("danger");
+
+    status.innerText = "ONLINE";
+    status.style.background = "#d9ffe5";
+    status.style.color = "#08752d";
+
+    setTimeout(() => {
+
+      if(driverOnline){
+        showScreen("rideRequest");
+      }
+
+    },1200);
+
+  }else{
+
+    btn.innerText = "Go Online";
+    btn.classList.remove("danger");
+    btn.classList.add("success");
+
+    status.innerText = "OFFLINE";
+
+  }
+
+}
+
+
+function requestDemoRide(){
+
+  if(!driverOnline){
+
+    alert("Please go Online to receive rides.");
+
+    showScreen("dashboard");
+
+    return;
+  }
+
+  showScreen("rideRequest");
+}
+
+
+function acceptRide(){
+
+  showScreen("reachRider");
+}
+
+
+function verifyOTP(){
+
+  const otp =
+    document.getElementById("otpInput").value.trim();
+
+  if(otp.length !== 4){
+
+    alert("Please enter valid 4 digit OTP.");
+
+    return;
+  }
+
+  showScreen("activeRide");
+}
+
+
+function endRide(){
+
+  showScreen("payment");
+}
+
+
+function completePayment(){
+
+  showScreen("security");
+}
+
+
+function startFaceVerification(){
+
+  const box =
+    document.querySelector(".face-box");
+
+  box.innerHTML = "🔍";
+
+  setTimeout(() => {
+
+    box.innerHTML = "✓";
+
+    box.style.borderColor = "#16a05d";
+    box.style.color = "#16a05d";
+
+    setTimeout(() => {
+
+      showScreen("securityResult");
+
+    },800);
+
+  },1800);
+
+}
+
+
+function subscribeDriver(plan){
+
+  alert(
+    plan +
+    " selected. Final subscription amount and commission rules will be controlled by Admin."
+  );
+
+}
+
+</script>
+
+</body>
+</html>
