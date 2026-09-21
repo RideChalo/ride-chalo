@@ -109,18 +109,36 @@ async function continueEmailLogin(){
     showMsg('Please enter a valid email address.');
     return;
   }
+
   localStorage.setItem('rc_pending_email',email);
+
+  // Real Supabase email verification only.
+  // No demo-mode fallback: if Supabase is not initialized,
+  // show the actual setup error instead of pretending to send mail.
   if(!supabaseReady()){
-    showMsg('Demo mode: Email verification will be connected after Supabase email setup.');
+    showMsg('Supabase is not initialized. Please check supabase-config.js.');
     return;
   }
+
   const redirectTo=new URL('home.html',window.location.href).href;
+
   const {error}=await supabaseClient.auth.signInWithOtp({
     email,
-    options:{emailRedirectTo:redirectTo}
+    options:{
+      emailRedirectTo:redirectTo,
+      shouldCreateUser:true
+    }
   });
-  if(error){showMsg(error.message);return;}
-  showMsg('Verification link sent to your email. Please open the email and verify to continue.',true);
+
+  if(error){
+    showMsg(error.message);
+    return;
+  }
+
+  showMsg(
+    'Verification link sent to your email. Please open the email and verify to continue.',
+    true
+  );
 }
 </script>
 </body>
