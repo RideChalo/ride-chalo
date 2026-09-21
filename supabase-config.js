@@ -16,7 +16,7 @@ const SUPABASE_URL =
   "https://xocfwbrqxllqyufjddcv.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "sb_publishable_p45SbnHnuq8ed7SSZzBLOQ_ezEvaBHA0NTY5NH0.QcNN01TbDLW6m9xAs4Wl1I7OYpb6ZjQE3zlTwKszN_A";
+  "sb_publishable_p45SbnHnuq8ed7SSZzBLOQ_ezEvaBHA";
 
 let supabaseClient = null;
 
@@ -24,7 +24,7 @@ try {
   if (
     window.supabase &&
     SUPABASE_URL.startsWith("https://") &&
-    SUPABASE_ANON_KEY
+    SUPABASE_ANON_KEY!== "sb_publishable_p45SbnHnuq8ed7SSZzBLOQ_ezEvaBHA"
   ) {
     supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
