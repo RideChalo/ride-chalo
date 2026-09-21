@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0757A0"><link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png"><title>Ride Chalo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0757A0">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Ride Chalo</title>
 <link rel="stylesheet" href="./styles.css">
+<style>
+.login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 20px;background:#eef4f9;padding:5px;border-radius:14px}
+.login-tab{border:0;background:transparent;border-radius:10px;padding:12px 8px;font-weight:700;color:#536579;cursor:pointer}
+.login-tab.active{background:#fff;color:#0757A0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.login-panel.hidden{display:none}
+.email-box{display:flex;align-items:center;border:1px solid #d9e1e8;border-radius:16px;background:#fff;min-height:58px;overflow:hidden}
+.email-icon{padding:0 14px;font-size:20px}
+.email-box input{flex:1;border:0;outline:0;padding:16px 14px 16px 0;font-size:16px;background:transparent}
+.login-note{margin-top:10px;color:#6f7f90;font-size:12px;line-height:1.4}
+</style>
 </head>
 <body>
 <div class="app">
@@ -13,39 +26,102 @@
     <div class="brand">Ride <span>Chalo</span></div>
     <div class="tagline">RIDE • RENT • EXPLORE</div>
   </div>
+
   <div class="content">
     <div class="welcome">Welcome to Ride Chalo 👋</div>
     <div class="subtitle">Book rides, rent vehicles and explore places — all in one platform.</div>
-    <label class="label">Mobile Number</label>
-    <div class="phone-box">
-      <div class="country">🇮🇳 +91</div>
-      <input id="phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter mobile number">
+
+    <div class="login-tabs">
+      <button id="mobileTab" class="login-tab active" onclick="switchLogin('mobile')">📱 Mobile</button>
+      <button id="emailTab" class="login-tab" onclick="switchLogin('email')">📧 Email</button>
     </div>
-    <button class="btn" style="margin-top:20px" onclick="continueLogin()">Continue</button>
+
+    <div id="mobilePanel" class="login-panel">
+      <label class="label">Mobile Number</label>
+      <div class="phone-box">
+        <div class="country">🇮🇳 +91</div>
+        <input id="phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter mobile number">
+      </div>
+      <button class="btn" style="margin-top:20px" onclick="continueMobileLogin()">Continue with Mobile</button>
+      <div class="login-note">You will receive an SMS OTP on your mobile number.</div>
+    </div>
+
+    <div id="emailPanel" class="login-panel hidden">
+      <label class="label">Email Address</label>
+      <div class="email-box">
+        <div class="email-icon">📧</div>
+        <input id="email" type="email" autocomplete="email" placeholder="Enter your email address">
+      </div>
+      <button class="btn" style="margin-top:20px" onclick="continueEmailLogin()">Continue with Email</button>
+      <div class="login-note">A secure email verification link will be sent to your email.</div>
+    </div>
+
     <div id="msg" class="notice hidden"></div>
+
     <div class="features">
       <div class="feature"><div class="feature-icon">🚕</div>Ride</div>
       <div class="feature"><div class="feature-icon">🏍️</div>Rental</div>
       <div class="feature"><div class="feature-icon">🌴</div>Explore</div>
     </div>
   </div>
-  <div class="bottom">By continuing, you agree to our Terms & Privacy Policy.<div>Ride Chalo</div></div>
+
+  <div class="bottom">
+    By continuing, you agree to our Terms & Privacy Policy.
+    <div>Ride Chalo</div>
+  </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./supabase-config.js"></script>
 <script>
-function showMsg(t,ok=false){const e=document.getElementById('msg');e.textContent=t;e.className='notice '+(ok?'success':'');}
-async function continueLogin(){
- const p=document.getElementById('phone').value.trim();
- if(!/^[6-9][0-9]{9}$/.test(p)){showMsg('Please enter a valid 10-digit Indian mobile number.');return;}
- const phone='+91'+p;
- localStorage.setItem('rc_pending_phone',phone);
- if(!supabaseReady()){
-   location.href='otp.html?demo=1'; return;
- }
- const {error}=await supabaseClient.auth.signInWithOtp({phone});
- if(error){showMsg(error.message);return;}
- location.href='otp.html';
+function showMsg(t,ok=false){
+  const e=document.getElementById('msg');
+  e.textContent=t;
+  e.className='notice '+(ok?'success':'');
+}
+function switchLogin(type){
+  const mobile=type==='mobile';
+  document.getElementById('mobilePanel').classList.toggle('hidden',!mobile);
+  document.getElementById('emailPanel').classList.toggle('hidden',mobile);
+  document.getElementById('mobileTab').classList.toggle('active',mobile);
+  document.getElementById('emailTab').classList.toggle('active',!mobile);
+  document.getElementById('msg').className='notice hidden';
+}
+async function continueMobileLogin(){
+  const p=document.getElementById('phone').value.trim();
+  if(!/^[6-9][0-9]{9}$/.test(p)){
+    showMsg('Please enter a valid 10-digit Indian mobile number.');
+    return;
+  }
+  const phone='+91'+p;
+  localStorage.setItem('rc_pending_phone',phone);
+  if(!supabaseReady()){
+    location.href='otp.html?demo=1';
+    return;
+  }
+  const {error}=await supabaseClient.auth.signInWithOtp({phone});
+  if(error){showMsg(error.message);return;}
+  location.href='otp.html';
+}
+async function continueEmailLogin(){
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showMsg('Please enter a valid email address.');
+    return;
+  }
+  localStorage.setItem('rc_pending_email',email);
+  if(!supabaseReady()){
+    showMsg('Demo mode: Email verification will be connected after Supabase email setup.');
+    return;
+  }
+  const redirectTo=new URL('home.html',window.location.href).href;
+  const {error}=await supabaseClient.auth.signInWithOtp({
+    email,
+    options:{emailRedirectTo:redirectTo}
+  });
+  if(error){showMsg(error.message);return;}
+  showMsg('Verification link sent to your email. Please open the email and verify to continue.',true);
 }
 </script>
-</body></html>
+</body>
+</html>
